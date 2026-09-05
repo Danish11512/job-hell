@@ -7,7 +7,7 @@ Firecrawl scraped the embed board (200, markdown). Probed curl, robots.txt, per-
 ## Method
 1. **Firecrawl scrape** of embed board URL → HTTP 200, ~30K markdown, one-row-per-job tables.
 2. **curl -L** of embed HTML → Remix SPA embedding `window.__remixContext` (~33KB JSON blob).
-3. **curl -L** of legacy `boards-api.greenhouse.io` (`/departments`, `/jobs`, `/jobs/<id>`) → all dead.
+3. **curl** of the legacy `boards-api.greenhouse.io` JSON API (`/v1/boards/airbnb/jobs`, `/v1/boards/airbnb/departments`) → both **200, valid JSON** (171 jobs / departments tree). [antagonize note: the earlier report wrongly called this "all dead" after testing the malformed no-path `/jobs?token=` form, which 301s.]
 4. **curl** of `?page=2/4/5` and filter variants (`department_id`, `office_id`, `location`, `query`, `sort`).
 5. **curl** of `/embed/job_app?gh_jid=` and canonical job detail route.
 6. **curl** of `robots.txt` on both hosts.
@@ -17,16 +17,19 @@ CamoFox unnecessary — no 403, no auth shell.
 ## Accessibility / blockers
 - **No bot wall, no auth, no 403.** Firecrawl + plain curl both 200.
 - **Host migration:** `boards.greenhouse.io/embed/job_board?for=airbnb` 301→ `job-boards.greenhouse.io/...`. New canonical host.
-- **Legacy JSON API DEAD.** `boards-api.greenhouse.io/departments?token=airbnb` and `/jobs?...` 301→404. Per-job `/jobs/<id>?token=` 404 directly. Don't rely on it.
+- **Legacy JSON API is ALIVE — [antagonize correction, re-verified 2026-09-04].** The original report said the boards-api was dead (tested malformed `/jobs?token=` = no-path 301 form). The CORRECT form works: `https://boards-api.greenhouse.io/v1/boards/airbnb/jobs?content=true` => HTTP 200, valid JSON, **171 jobs** with rich fields (title, location, content, departments, offices, metadata, internal_job_id, first_published, updated_at, application_deadline, absolute_url). `.../v1/boards/airbnb/departments` => 200 (departments tree). The no-path forms `/jobs?token=`, `/departments?token=` 301 (the URL is wrong, not the API dead). Per-job `/v1/boards/<org>/jobs/<id>` is 200 too. **This is the single best structured data source for greenhouse — prefer it over markdown parsing.**
 - **robots.txt caveat:** both hosts `Disallow: /embed/`. No technical enforcement, but a ToS flag. Page also emits `<meta name="robots" content="noindex">`.
 - **No rate-limit headers observed**; not stress-tested.
 
 ## Data surface
-Not a REST API — a **Remix SSR page** embedding the loader payload inline:
+Two real extraction surfaces (both verified live):
 
-```
-window.__remixContext = { ... };
-```
+1. **Legacy JSON API (best structured source):** `https://boards-api.greenhouse.io/v1/boards/<org>/jobs?content=true` → 200, valid JSON array with per-job title, location, content, departments, offices, metadata, internal_job_id, first_published, updated_at, absolute_url. Also `/v1/boards/<org>/departments`. Use this for a filterable, pre-structured list.
+2. **Embed HTML → `window.__remixContext`:** the SSR loader payload blob (`~33KB`) embedding the same board data inline (`application/json`).
+
+Filter-friendly fields from the JSON API: title, location (object w/ name), content (full HTML), departments[], offices[], first_published, updated_at.
+
+The embed HTML `window.__remixContext` loader payload shape:
 
 Path:
 ```

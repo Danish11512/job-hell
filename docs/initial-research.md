@@ -142,11 +142,15 @@ the consensus above:
 - **LinkedIn — no salary in feed; pagination + filters via the guest
   `jobs-guest` seeMore API.** Filters `f_TPR` (date), `f_WT` (remote),
   `f_AL`/`f_EA` (easy apply), `f_E` (experience). Feed is stale-heavy.
-- **Greenhouse — legacy JSON API is DEAD.** Host migrated
-  `boards.greenhouse.io → job-boards.greenhouse.io` (301). Data lives in the
-  embedded `window.__remixContext` JSON blob (~33KB) in the embed HTML.
-  No server-side filtering; pagination server-side only. `robots.txt` disallows
-  `/embed/`.
+- **Greenhouse — best source is the LEGACY JSON API (alive, not dead).**
+  `https://boards-api.greenhouse.io/v1/boards/<org>/jobs?content=true` → HTTP
+  200, valid JSON, 171 jobs with rich structured fields (title, location,
+  content, departments, offices, metadata, timestamps). Earlier "API is DEAD"
+  note was wrong — it came from testing a malformed no-path `/jobs?token=`
+  form (which 301s). Use `/v1/boards/<org>/jobs` over markdown parsing. Host
+  migrated `boards.greenhouse.io → job-boards.greenhouse.io` (301); embed HTML
+  also carries a `window.__remixContext` (~33KB) blob. No server-side filter
+  params on the embed; pagination server-side. `robots.txt` disallows `/embed/`.
 - **Indeed — Firecrawl 403 stable; CamoFox required.** Extractor targets the
   rendered a11y tree; apply-redirect endpoints `/rc/clk?jk=` (organic) and
   `/pagead/clk` (sponsored). Robots denies `/` to most AI crawlers (ClaudeBot,

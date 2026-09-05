@@ -27,8 +27,10 @@ bot-protected job sites, filter into a list before applying.
 ## Key extractor facts (see per-site docs)
 
 - Best structured: **Lever** JSON API (`api.lever.co/v0/postings/<slug>?mode=json` +
-  `department`/`location`/`commitment`/`team` server filters), **Wellfound**
-  `__NEXT_DATA__` Apollo cache, **Greenhouse** `__remixContext` blob.
+  `department`/`location`/`commitment`/`team` server filters), **Greenhouse**
+  legacy JSON API (`boards-api.greenhouse.io/v1/boards/<org>/jobs` — alive),
+  **Wellfound** `__NEXT_DATA__` Apollo cache (Greenhouse embed also exposes a
+  `__remixContext` blob).
 - Hardest: **Indeed** (Firecrawl 403 → CamoFox a11y tree) and **Glassdoor**
   feed (fine) but detail page blocked on both tiers.
 - Recurring pitfall: each site wraps its data in a different embedded JSON blob
