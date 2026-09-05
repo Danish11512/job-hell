@@ -1,17 +1,16 @@
 # job-hell
 
-Job listing extractor research for a job pre-screen app — pull listings from bot-protected job sites, filter into a list before applying.
+Job listing extractor research for a job pre-screen app. Stack: self-hosted Firecrawl (linux-mint:3002) + CamoFox anti-detection browser (remote backend).
 
 ## docs/
-- `initial-research.md` — consensus: what's reachable/blocked/filterable per site + best data surface.
-- `wellfound.md` `linkedin.md` `greenhouse.md` `indeed.md` `glassdoor.md` `lever.md` — per-site extractor deep research (fetch path, fields, filters, blocks, ToS). Each produced by Devin ACP primary + antagonize pass; ends with VERDICT (+ CORRECTION where the critique found an error).
+- `initial-research.md` — consensus: reachable/blocked/filterable per site + escalation ladder.
+- `wellfound.md` `linkedin.md` `greenhouse.md` `lever.md` `dice.md` — FireCrawl-tier extractors.
+- `glassdoor.md` — FireCrawl (waitFor+retry) + CamoFox; detail blocked.
+- `indeed.md` — requires remote CamoFox backend.
+- `ziprecruiter.md` — requires CamoFox.
+- `builtin.md` `levelsfyi.md` `otta.md` `remoteok.md` `weworkremotely.md` `workatastartup.md` — stub placeholders (unverified).
 
-## Stack
-- Firecrawl (self-hosted v2.11.162) — fast tier, no bot wall.
-- CamoFox (anti-detection browser) — escalation for hard walls.
-- Devin ACP (glm-5-2) — deep-research passes (primary + adversarial).
-
-## Key extractor facts
-- Best structured: **Greenhouse** legacy JSON API (`boards-api.greenhouse.io/v1/boards/<org>/jobs`), **Lever** JSON API (`api.lever.co/v0/postings/<slug>?mode=json`), **Wellfound** `__NEXT_DATA__` Apollo cache.
-- Hardest: **Indeed** (Firecrawl 403 → CamoFox), **Glassdoor** detail page (blocked both tiers).
-- Recurring pitfall: per-site data surface differs (JSON blob vs card pattern) — one extractor per site, no single endpoint.
+## Key facts
+- 7 of 8 tested boards scrapeable. Best/least effort: Greenhouse + Lever JSON APIs, Wellfound `__NEXT_DATA__`, Dice.
+- Hard: Indeed (remote CamoFox), ZipRecruiter (CamoFox), Glassdoor detail (blocked both tiers).
+- Rule: Firecrawl first → waitFor+retry → CamoFox remote. HTTP 200 ≠ success.
